@@ -6,6 +6,8 @@ plugins {
     id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
     id("org.openapi.generator") version "7.6.0"
+    id("checkstyle")
+    id("com.diffplug.spotless") version "6.25.0"
 }
 
 group = "com.example"
@@ -20,6 +22,27 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+spotless {
+    java {
+        googleJavaFormat()
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+checkstyle {
+    toolVersion = "10.17.0"
+    configFile = file("$rootDir/config/checkstyle/google_checks_custom.xml")
+}
+
+tasks.withType<Checkstyle>().configureEach {
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
 
 val generateJavaClient by tasks.registering(GenerateTask::class)  {
