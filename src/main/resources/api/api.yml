@@ -1,93 +1,43 @@
 openapi: 3.0.3
 info:
   version: '1.0'
-  title: HEI Admin API
+  title: Company Management API
   description: |
-    _Programmatically connect to a computer programming [school](https://hei.school)._
-    After [joining us](mailto:contact@hei.school),
-    you can get an identification token from
-    our [dev](https://dev-hei-admin.auth.eu-west-3.amazoncognito.com/oauth2/authorize?client_id=5s8cg50doahmu855rlc8fr6qmp&response_type=token&scope=email+openid&redirect_uri=https%3A%2F%2Fapi-dev.hei.school%2Fwhoami)
-    or [prod](https://prod-hei-admin.auth.eu-west-3.amazoncognito.com/oauth2/authorize?client_id=i8bg538jpfu6mqmqb61m26trd&response_type=token&scope=email+openid&redirect_uri=https%3A%2F%2Fapi-prod.hei.school%2Fwhoami)
-    authentication service.
-    Then, start playing with our system!
-
-    The implementation of our API is [publicly disclosed](https://github.com/hei-school/hei-admin-api).
-    You are welcome to try and compromise it. Happy hacking!
+    API CRUD pour la gestion des entreprises, chantiers, entrepôts, équipements, matériaux,
+    mouvements financiers, dépenses, achats et frais de transport.
+    Basée sur le schéma de base de données fourni.
 
 servers:
-  - url: 'https://api-dev.hei.school'
-  - url: 'https://api-prod.hei.school'
+  - url: 'https://api-dev.company.com'
+  - url: 'https://api-prod.company.com'
 
 security:
   - BearerAuth: [ ]
 
 paths:
-  '/whoami':
+
+  # =========================
+  # USERS
+  # =========================
+  '/users/{id}':
     get:
       tags:
-        - Security
-      summary: Who am I? Tells you who you are.
-      operationId: whoami
-      responses:
-        '200':
-          description: Who you are
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Whoami'
-        '400':
-          $ref: '#/components/responses/400'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-  '/ping':
-    get:
-      tags:
-        - Security
-      summary: pong
-      operationId: ping
-      responses:
-        '200':
-          description: pong
-          content:
-            text/plain:
-              schema:
-                type: string
-                example: pong
-        '400':
-          $ref: '#/components/responses/400'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-  '/groups/{id}':
-    get:
-      tags:
-        - Teaching
-      summary: Get group by identifier
+        - Users
+      summary: Get user by identifier
+      operationId: getUserById
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: string
-      operationId: getGroupById
       responses:
         '200':
-          description: The identified group
+          description: The identified user
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Group'
+                $ref: '#/components/schemas/User'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -98,174 +48,12 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-  /groups:
-    get:
-      tags:
-        - Teaching
-      summary: Get all groups
-      operationId: getGroups
-      responses:
-        '200':
-          description: List of groups
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Group'
-        '400':
-          $ref: '#/components/responses/400'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-    put:
-      tags:
-        - Teaching
-      summary: Create new groups or update existing groups
-      description: Update groups when `id` are provided, create them otherwise.
-      operationId: createOrUpdateGroups
-      requestBody:
-        description: Groups to update
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/Group'
-      responses:
-        '200':
-          description: The created or updated groups
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Group'
-        '400':
-          $ref: '#/components/responses/400'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-  '/students/{id}':
+  /users:
     get:
       tags:
         - Users
-      summary: Get student by identifier
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      operationId: getStudentById
-      responses:
-        '200':
-          description: The identified student
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Student'
-        '400':
-          $ref: '#/components/responses/400'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-  /students/{student_id}/courses:
-    get:
-      tags:
-        - Users
-      summary: Get a specific student courses
-      parameters:
-        - name: student_id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: status
-          in: query
-          schema:
-            $ref: '#/components/schemas/CourseStatus'
-          description: By default, LINKED courses are provided.
-      operationId: getStudentCoursesById
-      responses:
-        '200':
-          description: The student courses
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Course'
-        '400':
-          $ref: '#/components/responses/400'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-    put:
-      tags:
-        - Users
-      summary: Link or unlink courses to a specific student
-      parameters:
-        - name: student_id
-          in: path
-          required: true
-          schema:
-            type: string
-      operationId: updateStudentCourses
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: '#/components/schemas/UpdateStudentCourse'
-      responses:
-        '200':
-          description: The student updated courses
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Course'
-        '400':
-          $ref: '#/components/responses/400'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-  /students:
-    get:
-      tags:
-        - Users
-      summary: Get all students
-      operationId: getStudents
+      summary: Get all users
+      operationId: getUsers
       parameters:
         - name: page
           in: query
@@ -275,30 +63,35 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/PageSize'
-        - name: ref
-          in: query
-          description: "Filter students by ref, case is ignored"
-          schema:
-            type: string
         - name: first_name
           in: query
-          description: "Filter students by first name, case is ignored"
+          description: "Filter users by first name, case is ignored"
           schema:
             type: string
         - name: last_name
           in: query
-          description: "Filter students by last name, case is ignored"
+          description: "Filter users by last name, case is ignored"
           schema:
             type: string
+        - name: email
+          in: query
+          description: "Filter users by email, case is ignored"
+          schema:
+            type: string
+        - name: role
+          in: query
+          description: "Filter users by role"
+          schema:
+            $ref: '#/components/schemas/Role'
       responses:
         '200':
-          description: List of students, ordered by ref.
+          description: List of users
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Student'
+                  $ref: '#/components/schemas/User'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -312,9 +105,9 @@ paths:
     put:
       tags:
         - Users
-      summary: Create new students or update existing students
-      description: Update students when `id` are provided, create them otherwise.
-      operationId: createOrUpdateStudents
+      summary: Create new users or update existing users
+      description: Update users when `id` are provided, create them otherwise.
+      operationId: crupdateUsers
       requestBody:
         required: true
         content:
@@ -322,17 +115,16 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Student'
+                $ref: '#/components/schemas/CrupdateUser'
       responses:
         '200':
-          description: The created or updated students
+          description: The created or updated users
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  allOf:
-                    - $ref: '#/components/schemas/Student'
+                  $ref: '#/components/schemas/User'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -343,25 +135,54 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-  '/courses/{id}':
+    delete:
+      tags:
+        - Users
+      summary: Delete a user by identifier
+      operationId: deleteUserById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+
+  # =========================
+  # COMPANY
+  # =========================
+  '/companies/{id}':
     get:
       tags:
-        - Teaching
-      summary: Get course by identifier
+        - Company
+      summary: Get company by identifier
+      operationId: getCompanyById
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: string
-      operationId: getCourseById
       responses:
         '200':
-          description: The identified course
+          description: The identified company
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Course'
+                $ref: '#/components/schemas/Company'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -372,81 +193,40 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-  /courses:
+  /companies:
     get:
       tags:
-        - Teaching
-      summary: Get all courses
-      operationId: getCourses
+        - Company
+      summary: Get all companies
+      operationId: getCompanies
       parameters:
         - name: page
           in: query
           schema:
             $ref: '#/components/schemas/Page'
-          description: Set value to 1 by default if null is provided
-          required: false
         - name: page_size
           in: query
-          description: Set value to 15 by default if null is provided
           schema:
             $ref: '#/components/schemas/PageSize'
-        - name: code
-          in: query
-          description: "Filter course by code, case is ignored"
-          required: false
-          schema:
-            type: string
         - name: name
           in: query
-          description: "Filter course by name, case is ignored"
-          required: false
+          description: "Filter companies by name, case is ignored"
           schema:
             type: string
-        - name: credits
+        - name: company_type
           in: query
-          description: "Filter course by credits, case is ignored"
-          required: false
+          description: "Filter by company type"
           schema:
-            type: string
-        - name: teacher_first_name
-          in: query
-          description: "Filter course by teacher first name, case is ignored"
-          required: false
-          schema:
-            type: string
-        - name: teacher_last_name
-          in: query
-          description: "Filter course by teacher last name, case is ignored"
-          required: false
-          schema:
-            type: string
-        - name: creditsOrder
-          in: query
-          description: "Order by credits. Can be DESC or ASC"
-          required: false
-          schema:
-            type: string
-            enum:
-              - DESC
-              - ASC
-        - name: codeOrder
-          in: query
-          description: "Order by code. Can be DESC or ASC"
-          required: false
-          schema:
-            type: string
-            enum:
-              - DESC
-              - ASC
+            $ref: '#/components/schemas/CompanyType'
       responses:
         '200':
-          description: List of all courses
+          description: List of companies
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
+                  $ref: '#/components/schemas/Company'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -459,10 +239,9 @@ paths:
           $ref: '#/components/responses/500'
     put:
       tags:
-        - Teaching
-      summary: Crupdate courses
-      description: Update courses when id are provided, create them otherwise.
-      operationId: crupdateCourses
+        - Company
+      summary: Create new companies or update existing companies
+      operationId: crupdateCompanies
       requestBody:
         required: true
         content:
@@ -470,16 +249,16 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/CrupdateCourse'
+                $ref: '#/components/schemas/CrupdateCompany'
       responses:
         '200':
-          description: The crupdated courses
+          description: The created or updated companies
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Course'
+                  $ref: '#/components/schemas/Company'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -490,25 +269,53 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-  '/teachers/{id}':
+    delete:
+      tags:
+        - Company
+      summary: Delete a company by identifier
+      operationId: deleteCompanyById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Company deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # JOB
+  # =========================
+  '/jobs/{id}':
     get:
       tags:
-        - Users
-      summary: Get teacher by identifier
+        - Job
+      summary: Get job by identifier
+      operationId: getJobById
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: string
-      operationId: getTeacherById
       responses:
         '200':
-          description: The identified teacher
+          description: The identified job
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Teacher'
+                $ref: '#/components/schemas/Job'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -519,12 +326,12 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-  /teachers:
+  /jobs:
     get:
       tags:
-        - Users
-      summary: Get all teachers
-      operationId: getTeachers
+        - Job
+      summary: Get all jobs
+      operationId: getJobs
       parameters:
         - name: page
           in: query
@@ -534,30 +341,23 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/PageSize'
-        - name: ref
+        - name: status
           in: query
-          description: "Filter teachers by ref, case is ignored"
           schema:
-            type: string
-        - name: first_name
+            $ref: '#/components/schemas/JobStatus'
+        - name: company_id
           in: query
-          description: "Filter teachers by first name, case is ignored"
-          schema:
-            type: string
-        - name: last_name
-          in: query
-          description: "Filter teachers by last name, case is ignored"
           schema:
             type: string
       responses:
         '200':
-          description: List of teachers, ordered by ref.
+          description: List of jobs
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Teacher'
+                  $ref: '#/components/schemas/Job'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -570,10 +370,9 @@ paths:
           $ref: '#/components/responses/500'
     put:
       tags:
-        - Users
-      summary: Create new teachers or update existing teachers
-      description: Update teachers when `id` are provided, create them otherwise.
-      operationId: createOrUpdateTeachers
+        - Job
+      summary: Create new jobs or update existing jobs
+      operationId: crupdateJobs
       requestBody:
         required: true
         content:
@@ -581,16 +380,40 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Teacher'
+                $ref: '#/components/schemas/CrupdateJob'
       responses:
         '200':
-          description: The created or updated teachers
+          description: The created or updated jobs
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Teacher'
+                  $ref: '#/components/schemas/Job'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - Job
+      summary: Delete a job by identifier
+      operationId: deleteJobById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Job deleted successfully
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -602,25 +425,28 @@ paths:
         '500':
           $ref: '#/components/responses/500'
 
-  '/managers/{id}':
+  # =========================
+  # WAREHOUSE
+  # =========================
+  '/warehouses/{id}':
     get:
       tags:
-        - Users
-      summary: Get manager by identifier
+        - Warehouse
+      summary: Get warehouse by identifier
+      operationId: getWarehouseById
       parameters:
         - name: id
           in: path
           required: true
           schema:
             type: string
-      operationId: getManagerById
       responses:
         '200':
-          description: The identified manager
+          description: The identified warehouse
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Manager'
+                $ref: '#/components/schemas/Warehouse'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -631,12 +457,12 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-  /managers:
+  /warehouses:
     get:
       tags:
-        - Users
-      summary: Get all managers
-      operationId: getManagers
+        - Warehouse
+      summary: Get all warehouses
+      operationId: getWarehouses
       parameters:
         - name: page
           in: query
@@ -646,15 +472,75 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/PageSize'
+        - name: job_id
+          in: query
+          schema:
+            type: string
       responses:
         '200':
-          description: List of managers, ordered by ref.
+          description: List of warehouses
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Manager'
+                  $ref: '#/components/schemas/Warehouse'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - Warehouse
+      summary: Create new warehouses or update existing warehouses
+      operationId: crupdateWarehouses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateWarehouse'
+      responses:
+        '200':
+          description: The created or updated warehouses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Warehouse'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - Warehouse
+      summary: Delete a warehouse by identifier
+      operationId: deleteWarehouseById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Warehouse deleted successfully
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -666,26 +552,28 @@ paths:
         '500':
           $ref: '#/components/responses/500'
 
-  /delay_penalty_change:
-    post:
+  # =========================
+  # EQUIPMENT
+  # =========================
+  '/equipment/{id}':
+    get:
       tags:
-        - Paying
-      summary: Change current delay penalty configuration
-      operationId: createDelayPenaltyChange
-      requestBody:
-        description: Delay penalties to create
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateDelayPenaltyChange'
+        - Equipment
+      summary: Get equipment by identifier
+      operationId: getEquipmentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
-          description: List of created delay penalties
+          description: The identified equipment
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DelayPenalty'
+                $ref: '#/components/schemas/Equipment'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -696,19 +584,90 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-  /delay_penalty:
+  /equipment:
     get:
       tags:
-        - Paying
-      summary: Get current delay penalty
-      operationId: getDelayPenalty
+        - Equipment
+      summary: Get all equipment
+      operationId: getEquipment
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+        - name: warehouse_id
+          in: query
+          schema:
+            type: string
       responses:
         '200':
-          description: Active delay penalty
+          description: List of equipment
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DelayPenalty'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Equipment'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - Equipment
+      summary: Create new equipment or update existing equipment
+      operationId: crupdateEquipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateEquipment'
+      responses:
+        '200':
+          description: The created or updated equipment
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Equipment'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - Equipment
+      summary: Delete equipment by identifier
+      operationId: deleteEquipmentById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Equipment deleted successfully
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -720,30 +679,28 @@ paths:
         '500':
           $ref: '#/components/responses/500'
 
-  /students/{student_id}/fees/{fee_id}:
+  # =========================
+  # MATERIAL
+  # =========================
+  '/materials/{id}':
     get:
       tags:
-        - Paying
-      summary: Get student fee by identifier
+        - Material
+      summary: Get material by identifier
+      operationId: getMaterialById
       parameters:
-        - name: student_id
+        - name: id
           in: path
           required: true
           schema:
             type: string
-        - name: fee_id
-          in: path
-          required: true
-          schema:
-            type: string
-      operationId: getStudentFeeById
       responses:
         '200':
-          description: Identified student fee
+          description: The identified material
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fee'
+                $ref: '#/components/schemas/Material'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -754,18 +711,13 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-  /students/{student_id}/fees:
+  /materials:
     get:
       tags:
-        - Paying
-      summary: Get all student fees ordered by due datetime desc
-      description: Fees can be filtered with an optional payment status parameter.
+        - Material
+      summary: Get all materials
+      operationId: getMaterials
       parameters:
-        - name: student_id
-          in: path
-          required: true
-          schema:
-            type: string
         - name: page
           in: query
           schema:
@@ -774,24 +726,19 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/PageSize'
-        - name: status
+        - name: warehouse_id
           in: query
           schema:
             type: string
-            enum:
-              - UNPAID
-              - PAID
-              - LATE
-      operationId: getStudentFees
       responses:
         '200':
-          description: List of all student fees
+          description: List of materials
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Fee'
+                  $ref: '#/components/schemas/Material'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -802,35 +749,28 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-    post:
+    put:
       tags:
-        - Paying
-      summary: Create student fees
-      parameters:
-        - name: student_id
-          in: path
-          required: true
-          schema:
-            type: string
-      operationId: createStudentFees
+        - Material
+      summary: Create new materials or update existing materials
+      operationId: crupdateMaterials
       requestBody:
-        description: Student fees to create
         required: true
         content:
           application/json:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/CreateFee'
+                $ref: '#/components/schemas/CrupdateMaterial'
       responses:
         '200':
-          description: Created student fees
+          description: The created or updated materials
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Fee'
+                  $ref: '#/components/schemas/Material'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -841,22 +781,70 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-  /fees:
-    get:
+    delete:
       tags:
-        - Paying
-      summary: Get all student fees filtered by status
+        - Material
+      summary: Delete material by identifier
+      operationId: deleteMaterialById
       parameters:
-        - name: status
+        - name: id
           in: query
-          description: "See the PaymentStatus object for its value."
+          required: true
           schema:
             type: string
-            default: LATE
-            enum:
-              - UNPAID
-              - LATE
-              - PAID
+      responses:
+        '204':
+          description: Material deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # MONETARY MOVEMENT
+  # =========================
+  '/monetary_movements/{id}':
+    get:
+      tags:
+        - MonetaryMovement
+      summary: Get monetary movement by identifier
+      operationId: getMonetaryMovementById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified monetary movement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonetaryMovement'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /monetary_movements:
+    get:
+      tags:
+        - MonetaryMovement
+      summary: Get all monetary movements
+      operationId: getMonetaryMovements
+      parameters:
         - name: page
           in: query
           schema:
@@ -865,16 +853,15 @@ paths:
           in: query
           schema:
             $ref: '#/components/schemas/PageSize'
-      operationId: getFees
       responses:
         '200':
-          description: List of filtered student fees
+          description: List of monetary movements
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Fee'
+                  $ref: '#/components/schemas/MonetaryMovement'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -885,84 +872,28 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
-  /students/{student_id}/fees/{fee_id}/payments:
-    get:
+    put:
       tags:
-        - Paying
-      summary: Get all student payments of a specific fee. Resulting list is ordered by creation datetime desc.
-      parameters:
-        - name: student_id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: fee_id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: page
-          in: query
-          schema:
-            $ref: '#/components/schemas/Page'
-        - name: page_size
-          in: query
-          schema:
-            $ref: '#/components/schemas/PageSize'
-      operationId: getStudentPayments
-      responses:
-        '200':
-          description: List of all student payments
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Payment'
-        '400':
-          $ref: '#/components/responses/400'
-        '403':
-          $ref: '#/components/responses/403'
-        '404':
-          $ref: '#/components/responses/404'
-        '429':
-          $ref: '#/components/responses/429'
-        '500':
-          $ref: '#/components/responses/500'
-    post:
-      tags:
-        - Paying
-      summary: Create student payments
-      parameters:
-        - name: student_id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: fee_id
-          in: path
-          required: true
-          schema:
-            type: string
-      operationId: createStudentPayments
+        - MonetaryMovement
+      summary: Create new monetary movements or update existing ones
+      operationId: crupdateMonetaryMovements
       requestBody:
-        description: Student payments to create
         required: true
         content:
           application/json:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/CreatePayment'
+                $ref: '#/components/schemas/CrupdateMonetaryMovement'
       responses:
         '200':
-          description: Created student payments
+          description: The created or updated monetary movements
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Payment'
+                  $ref: '#/components/schemas/MonetaryMovement'
         '400':
           $ref: '#/components/responses/400'
         '403':
@@ -973,6 +904,1277 @@ paths:
           $ref: '#/components/responses/429'
         '500':
           $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - MonetaryMovement
+      summary: Delete monetary movement by identifier
+      operationId: deleteMonetaryMovementById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Monetary movement deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # EXPENSE
+  # =========================
+  '/expenses/{id}':
+    get:
+      tags:
+        - Expense
+      summary: Get expense by identifier
+      operationId: getExpenseById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified expense
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpenseMoney'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /expenses:
+    get:
+      tags:
+        - Expense
+      summary: Get all expenses
+      operationId: getExpenses
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+      responses:
+        '200':
+          description: List of expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExpenseMoney'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - Expense
+      summary: Create new expenses or update existing ones
+      operationId: crupdateExpenses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateExpenseMoney'
+      responses:
+        '200':
+          description: The created or updated expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExpenseMoney'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - Expense
+      summary: Delete expense by identifier
+      operationId: deleteExpenseById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Expense deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # INCOME
+  # =========================
+  '/incomes/{id}':
+    get:
+      tags:
+        - Income
+      summary: Get income by identifier
+      operationId: getIncomeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified income
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncomeMoney'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /incomes:
+    get:
+      tags:
+        - Income
+      summary: Get all incomes
+      operationId: getIncomes
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+      responses:
+        '200':
+          description: List of incomes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IncomeMoney'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - Income
+      summary: Create new incomes or update existing ones
+      operationId: crupdateIncomes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateIncomeMoney'
+      responses:
+        '200':
+          description: The created or updated incomes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IncomeMoney'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - Income
+      summary: Delete income by identifier
+      operationId: deleteIncomeById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Income deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # TRAVEL EXPENSE
+  # =========================
+  '/travel_expenses/{id}':
+    get:
+      tags:
+        - TravelExpense
+      summary: Get travel expense by identifier
+      operationId: getTravelExpenseById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified travel expense
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelExpense'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /travel_expenses:
+    get:
+      tags:
+        - TravelExpense
+      summary: Get all travel expenses
+      operationId: getTravelExpenses
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+      responses:
+        '200':
+          description: List of travel expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelExpense'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - TravelExpense
+      summary: Create new travel expenses or update existing ones
+      operationId: crupdateTravelExpenses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateTravelExpense'
+      responses:
+        '200':
+          description: The created or updated travel expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelExpense'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - TravelExpense
+      summary: Delete travel expense by identifier
+      operationId: deleteTravelExpenseById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Travel expense deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # PURCHASE
+  # =========================
+  '/purchases/{id}':
+    get:
+      tags:
+        - Purchase
+      summary: Get purchase by identifier
+      operationId: getPurchaseById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified purchase
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Purchase'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /purchases:
+    get:
+      tags:
+        - Purchase
+      summary: Get all purchases
+      operationId: getPurchases
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+      responses:
+        '200':
+          description: List of purchases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Purchase'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - Purchase
+      summary: Create new purchases or update existing ones
+      operationId: crupdatePurchases
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdatePurchase'
+      responses:
+        '200':
+          description: The created or updated purchases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Purchase'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - Purchase
+      summary: Delete purchase by identifier
+      operationId: deletePurchaseById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Purchase deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # BANK FEE
+  # =========================
+  '/bank_fees/{id}':
+    get:
+      tags:
+        - BankFee
+      summary: Get bank fee by identifier
+      operationId: getBankFeeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified bank fee
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankFee'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /bank_fees:
+    get:
+      tags:
+        - BankFee
+      summary: Get all bank fees
+      operationId: getBankFees
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+      responses:
+        '200':
+          description: List of bank fees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BankFee'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - BankFee
+      summary: Create new bank fees or update existing ones
+      operationId: crupdateBankFees
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateBankFee'
+      responses:
+        '200':
+          description: The created or updated bank fees
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BankFee'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - BankFee
+      summary: Delete bank fee by identifier
+      operationId: deleteBankFeeById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Bank fee deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # OTHER EXPENSE
+  # =========================
+  '/other_expenses/{id}':
+    get:
+      tags:
+        - OtherExpense
+      summary: Get other expense by identifier
+      operationId: getOtherExpenseById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified other expense
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OtherExpense'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /other_expenses:
+    get:
+      tags:
+        - OtherExpense
+      summary: Get all other expenses
+      operationId: getOtherExpenses
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+      responses:
+        '200':
+          description: List of other expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OtherExpense'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - OtherExpense
+      summary: Create new other expenses or update existing ones
+      operationId: crupdateOtherExpenses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateOtherExpense'
+      responses:
+        '200':
+          description: The created or updated other expenses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OtherExpense'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - OtherExpense
+      summary: Delete other expense by identifier
+      operationId: deleteOtherExpenseById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Other expense deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # EMPLOYEE PAYMENT
+  # =========================
+  '/employee_payments/{id}':
+    get:
+      tags:
+        - EmployeePayment
+      summary: Get employee payment by identifier
+      operationId: getEmployeePaymentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified employee payment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeePayment'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /employee_payments:
+    get:
+      tags:
+        - EmployeePayment
+      summary: Get all employee payments
+      operationId: getEmployeePayments
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+        - name: employee_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of employee payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmployeePayment'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - EmployeePayment
+      summary: Create new employee payments or update existing ones
+      operationId: crupdateEmployeePayments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateEmployeePayment'
+      responses:
+        '200':
+          description: The created or updated employee payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EmployeePayment'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - EmployeePayment
+      summary: Delete employee payment by identifier
+      operationId: deleteEmployeePaymentById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Employee payment deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # TRAVEL PEOPLE
+  # =========================
+  '/travel_people/{id}':
+    get:
+      tags:
+        - TravelPeople
+      summary: Get travel people by identifier
+      operationId: getTravelPeopleById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified travel people
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelPeople'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /travel_people:
+    get:
+      tags:
+        - TravelPeople
+      summary: Get all travel people
+      operationId: getTravelPeople
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+        - name: travel_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of travel people
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelPeople'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - TravelPeople
+      summary: Create new travel people or update existing ones
+      operationId: crupdateTravelPeople
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateTravelPeople'
+      responses:
+        '200':
+          description: The created or updated travel people
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelPeople'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - TravelPeople
+      summary: Delete travel people by identifier
+      operationId: deleteTravelPeopleById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Travel people deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # TRAVEL MATERIALS
+  # =========================
+  '/travel_materials/{id}':
+    get:
+      tags:
+        - TravelMaterials
+      summary: Get travel materials by identifier
+      operationId: getTravelMaterialsById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified travel materials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelMaterials'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /travel_materials:
+    get:
+      tags:
+        - TravelMaterials
+      summary: Get all travel materials
+      operationId: getTravelMaterials
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+        - name: travel_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of travel materials
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelMaterials'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - TravelMaterials
+      summary: Create new travel materials or update existing ones
+      operationId: crupdateTravelMaterials
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateTravelMaterials'
+      responses:
+        '200':
+          description: The created or updated travel materials
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelMaterials'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - TravelMaterials
+      summary: Delete travel materials by identifier
+      operationId: deleteTravelMaterialsById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Travel materials deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
+  # =========================
+  # TRAVEL EQUIPMENT
+  # =========================
+  '/travel_equipment/{id}':
+    get:
+      tags:
+        - TravelEquipment
+      summary: Get travel equipment by identifier
+      operationId: getTravelEquipmentById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The identified travel equipment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelEquipment'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+  /travel_equipment:
+    get:
+      tags:
+        - TravelEquipment
+      summary: Get all travel equipment
+      operationId: getTravelEquipment
+      parameters:
+        - name: page
+          in: query
+          schema:
+            $ref: '#/components/schemas/Page'
+        - name: page_size
+          in: query
+          schema:
+            $ref: '#/components/schemas/PageSize'
+        - name: travel_id
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of travel equipment
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelEquipment'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    put:
+      tags:
+        - TravelEquipment
+      summary: Create new travel equipment or update existing ones
+      operationId: crupdateTravelEquipment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CrupdateTravelEquipment'
+      responses:
+        '200':
+          description: The created or updated travel equipment
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TravelEquipment'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - TravelEquipment
+      summary: Delete travel equipment by identifier
+      operationId: deleteTravelEquipmentById
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Travel equipment deleted successfully
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '429':
+          $ref: '#/components/responses/429'
+        '500':
+          $ref: '#/components/responses/500'
+
 components:
   securitySchemes:
     BearerAuth:
@@ -1010,205 +2212,560 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/InternalServerException'
+
   schemas:
-    Whoami:
+    # =========================
+    # ENUMS
+    # =========================
+    CompanyType:
+      type: string
+      enum:
+        - BTP
+        - HOTEL
+    JobStatus:
+      type: string
+      enum:
+        - PENDING_SIGNATURE
+        - IN_PROGRESS
+        - COMPLETED
+    PaymentType:
+      type: string
+      enum:
+        - ADVANCE
+        - MONTHLY
+        - OTHER
+    TransportStatus:
+      type: string
+      enum:
+        - IN_PROGRESS
+        - LOST
+        - ARRIVED
+    Sex:
+      type: string
+      enum:
+        - M
+        - F
+    Role:
+      type: string
+      enum:
+        - ADMIN
+        - WAREHOUSE_WORKER
+        - EMPLOYEE
+        - ADMINISTRATION
+
+    # =========================
+    # COMMON
+    # =========================
+    AuditFields:
+      properties:
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+        updated_by:
+          type: string
+        comment:
+          type: string
+
+    # =========================
+    # USER
+    # =========================
+    User:
+      allOf:
+        - $ref: '#/components/schemas/AuditFields'
       properties:
         id:
           type: string
         role:
-          type: string
-          enum:
-            - STUDENT
-            - TEACHER
-            - MANAGER
-        bearer:
-          type: string
-    User:
-      properties:
-        id:
-          type: string
-        ref:
-          type: string
-          example: STD000001
+          $ref: '#/components/schemas/Role'
         first_name:
           type: string
         last_name:
           type: string
         sex:
-          type: string
-          enum:
-            - M
-            - F
-        birth_date:
-          type: string
-          format: date
-        address:
-          type: string
-        phone:
-          type: string
+          $ref: '#/components/schemas/Sex'
         email:
           type: string
-        entrance_datetime:
+    CrupdateUser:
+      properties:
+        id:
           type: string
-          format: date-time
-        status:
-          $ref: '#/components/schemas/EnableStatus'
-    EnableStatus:
-      type: string
-      enum:
-        - ENABLED
-        - DISABLED
-    Student:
+        role:
+          $ref: '#/components/schemas/Role'
+        first_name:
+          type: string
+        last_name:
+          type: string
+        sex:
+          $ref: '#/components/schemas/Sex'
+        email:
+          type: string
+
+    # =========================
+    # COMPANY
+    # =========================
+    Company:
       allOf:
-        - $ref: '#/components/schemas/User'
-    Teacher:
-      allOf:
-        - $ref: '#/components/schemas/User'
-    Manager:
-      allOf:
-        - $ref: '#/components/schemas/User'
-    Group:
-      type: object
+        - $ref: '#/components/schemas/AuditFields'
       properties:
         id:
           type: string
         name:
           type: string
-          example: The group number one
-        ref:
+        rib:
           type: string
-          example: G1
-        creation_datetime:
+        description:
           type: string
-          format: date-time
-    CourseTemplate:
-      type: object
+        company_type:
+          $ref: '#/components/schemas/CompanyType'
+    CrupdateCompany:
       properties:
         id:
           type: string
-        code:
-          type: string
-          example: PROG1
         name:
           type: string
-          example: Algorithmics
-        credits:
-          type: integer
-        total_hours:
-          type: integer
-    CrupdateCourse:
+        rib:
+          type: string
+        description:
+          type: string
+        company_type:
+          $ref: '#/components/schemas/CompanyType'
+
+    # =========================
+    # JOB
+    # =========================
+    Job:
       allOf:
-        - $ref: '#/components/schemas/CourseTemplate'
-      type: object
-      properties:
-        main_teacher_id:
-          type: string
-    CourseStatus:
-      type: string
-      enum:
-        - LINKED
-        - UNLINKED
-    UpdateStudentCourse:
-      type: object
-      properties:
-        course_id:
-          type: string
-        status:
-          $ref: '#/components/schemas/CourseStatus'
-    Course:
-      allOf:
-        - $ref: '#/components/schemas/CourseTemplate'
-      type: object
-      properties:
-        main_teacher:
-          $ref: '#/components/schemas/Teacher'
-    CreateFee:
-      type: object
-      properties:
-        type:
-          type: string
-          enum:
-            - TUITION
-            - HARDWARE
-        comment:
-          type: string
-        total_amount:
-          type: integer
-        creation_datetime:
-          type: string
-          format: date-time
-        due_datetime:
-          type: string
-          format: date-time
-    Fee:
-      allOf:
-        - $ref: '#/components/schemas/CreateFee'
-      type: object
+        - $ref: '#/components/schemas/AuditFields'
       properties:
         id:
           type: string
-        student_id:
+        company_id:
           type: string
-        remaining_amount:
-          type: integer
+        description:
+          type: string
+        contract_signature_date:
+          type: string
+          format: date
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
         status:
-          type: string
-          enum:
-            - UNPAID
-            - PAID
-            - LATE
-        updated_at:
-          type: string
-          format: date-time
-    CreateDelayPenaltyChange:
-      type: object
-      properties:
-        interest_percent:
-          type: integer
-        interest_timerate:
-          type: string
-          enum:
-            - DAILY
-        grace_delay:
-          type: integer
-        applicability_delay_after_grace:
-          type: integer
-    DelayPenalty:
-      allOf:
-        - $ref: '#/components/schemas/CreateDelayPenaltyChange'
-      type: object
+          $ref: '#/components/schemas/JobStatus'
+    CrupdateJob:
       properties:
         id:
           type: string
-        creation_datetime:
+        company_id:
           type: string
-          format: date-time
-    CreatePayment:
-      type: object
+        description:
+          type: string
+        contract_signature_date:
+          type: string
+          format: date
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        status:
+          $ref: '#/components/schemas/JobStatus'
+
+    # =========================
+    # WAREHOUSE
+    # =========================
+    Warehouse:
+      allOf:
+        - $ref: '#/components/schemas/AuditFields'
       properties:
-        type:
+        id:
           type: string
-          enum:
-            - CASH
-            - MOBILE_MONEY
-            - SCHOLARSHIP
-            - FIX
+        name:
+          type: string
+        description:
+          type: string
+        job_id:
+          type: string
+    CrupdateWarehouse:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        job_id:
+          type: string
+
+    # =========================
+    # EQUIPMENT
+    # =========================
+    Equipment:
+      allOf:
+        - $ref: '#/components/schemas/AuditFields'
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        warehouse_id:
+          type: string
+        floor_number:
+          type: integer
+        storage_number:
+          type: integer
+    CrupdateEquipment:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        warehouse_id:
+          type: string
+        floor_number:
+          type: integer
+        storage_number:
+          type: integer
+
+    # =========================
+    # MATERIAL
+    # =========================
+    Material:
+      allOf:
+        - $ref: '#/components/schemas/AuditFields'
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        warehouse_id:
+          type: string
+        floor_number:
+          type: integer
+        storage_number:
+          type: integer
+    CrupdateMaterial:
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        warehouse_id:
+          type: string
+        floor_number:
+          type: integer
+        storage_number:
+          type: integer
+
+    # =========================
+    # MONETARY MOVEMENT
+    # =========================
+    MonetaryMovement:
+      allOf:
+        - $ref: '#/components/schemas/AuditFields'
+      properties:
+        id:
+          type: string
         amount:
           type: integer
-        comment:
+        description:
           type: string
-    Payment:
-      allOf:
-        - $ref: '#/components/schemas/CreatePayment'
-      type: object
+    CrupdateMonetaryMovement:
       properties:
         id:
           type: string
-        fee_id:
+        amount:
+          type: integer
+        description:
           type: string
-        creation_datetime:
+
+    # =========================
+    # INCOME
+    # =========================
+    IncomeMoney:
+      properties:
+        id:
+          type: string
+        monetary_id:
+          type: string
+        source_organization:
+          type: string
+        invoice_reference:
+          type: string
+    CrupdateIncomeMoney:
+      properties:
+        id:
+          type: string
+        monetary_id:
+          type: string
+        source_organization:
+          type: string
+        invoice_reference:
+          type: string
+
+    # =========================
+    # EXPENSE
+    # =========================
+    ExpenseMoney:
+      properties:
+        id:
+          type: string
+        monetary_id:
+          type: string
+    CrupdateExpenseMoney:
+      properties:
+        id:
+          type: string
+        monetary_id:
+          type: string
+
+    # =========================
+    # EMPLOYEE PAYMENT
+    # =========================
+    EmployeePayment:
+      allOf:
+        - $ref: '#/components/schemas/AuditFields'
+      properties:
+        id:
+          type: string
+        expense_id:
+          type: string
+        employee_id:
+          type: string
+        payment_description:
+          type: string
+        payment_type:
+          $ref: '#/components/schemas/PaymentType'
+    CrupdateEmployeePayment:
+      properties:
+        id:
+          type: string
+        expense_id:
+          type: string
+        employee_id:
+          type: string
+        payment_description:
+          type: string
+        payment_type:
+          $ref: '#/components/schemas/PaymentType'
+
+    # =========================
+    # TRAVEL EXPENSE
+    # =========================
+    TravelExpense:
+      properties:
+        id:
+          type: string
+        expense_id:
+          type: string
+        departure_location:
+          type: string
+        arrival_location:
+          type: string
+        departure_date:
           type: string
           format: date-time
+        arrival_date:
+          type: string
+          format: date-time
+    CrupdateTravelExpense:
+      properties:
+        id:
+          type: string
+        expense_id:
+          type: string
+        departure_location:
+          type: string
+        arrival_location:
+          type: string
+        departure_date:
+          type: string
+          format: date-time
+        arrival_date:
+          type: string
+          format: date-time
+
+    # =========================
+    # TRAVEL PEOPLE
+    # =========================
+    TravelPeople:
+      allOf:
+        - $ref: '#/components/schemas/AuditFields'
+      properties:
+        id:
+          type: string
+        travel_id:
+          type: string
+        person_name:
+          type: string
+    CrupdateTravelPeople:
+      properties:
+        id:
+          type: string
+        travel_id:
+          type: string
+        person_name:
+          type: string
+
+    # =========================
+    # TRAVEL MATERIALS
+    # =========================
+    TravelMaterials:
+      allOf:
+        - $ref: '#/components/schemas/AuditFields'
+      properties:
+        id:
+          type: string
+        travel_id:
+          type: string
+        material:
+          type: string
+        quantity:
+          type: integer
+        quantity_received:
+          type: integer
+    CrupdateTravelMaterials:
+      properties:
+        id:
+          type: string
+        travel_id:
+          type: string
+        material:
+          type: string
+        quantity:
+          type: integer
+        quantity_received:
+          type: integer
+
+    # =========================
+    # TRAVEL EQUIPMENT
+    # =========================
+    TravelEquipment:
+      allOf:
+        - $ref: '#/components/schemas/AuditFields'
+      properties:
+        id:
+          type: string
+        travel_id:
+          type: string
+        equipment:
+          type: string
+        quantity:
+          type: integer
+        status:
+          $ref: '#/components/schemas/TransportStatus'
+    CrupdateTravelEquipment:
+      properties:
+        id:
+          type: string
+        travel_id:
+          type: string
+        equipment:
+          type: string
+        quantity:
+          type: integer
+        status:
+          $ref: '#/components/schemas/TransportStatus'
+
+    # =========================
+    # PURCHASE
+    # =========================
+    Purchase:
+      properties:
+        id:
+          type: string
+        expense_id:
+          type: string
+        supplier:
+          type: string
+        equipment:
+          type: string
+        material:
+          type: string
+        quantity:
+          type: integer
+        is_equipment:
+          type: boolean
+    CrupdatePurchase:
+      properties:
+        id:
+          type: string
+        expense_id:
+          type: string
+        supplier:
+          type: string
+        equipment:
+          type: string
+        material:
+          type: string
+        quantity:
+          type: integer
+        is_equipment:
+          type: boolean
+
+    # =========================
+    # BANK FEE
+    # =========================
+    BankFee:
+      properties:
+        id:
+          type: string
+        expense_id:
+          type: string
+        bank_name:
+          type: string
+        description:
+          type: string
+    CrupdateBankFee:
+      properties:
+        id:
+          type: string
+        expense_id:
+          type: string
+        bank_name:
+          type: string
+        description:
+          type: string
+
+    # =========================
+    # OTHER EXPENSE
+    # =========================
+    OtherExpense:
+      properties:
+        id:
+          type: string
+        expense_id:
+          type: string
+        description:
+          type: string
+    CrupdateOtherExpense:
+      properties:
+        id:
+          type: string
+        expense_id:
+          type: string
+        description:
+          type: string
+
+    # =========================
+    # EXCEPTIONS
+    # =========================
     Page:
       type: integer
       description: Start at `1`
