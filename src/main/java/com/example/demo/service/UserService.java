@@ -1,18 +1,22 @@
 package com.example.demo.service;
 
+import com.example.demo.model.BoundedPageSize;
+import com.example.demo.model.PageFromOne;
 import com.example.demo.model.User;
+import com.example.demo.repository.Dao.UserManagerDao;
 import com.example.demo.repository.UserRepository;
+import com.example.demo.service.utils.PageUtils;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
 public class UserService {
   private final UserRepository repository;
-
-  // private final UserManagerDao UserManagerDao;
+  private final UserManagerDao UserManagerDao;
 
   public List<User> saveAll(List<User> users) {
     return repository.saveAll(users);
@@ -27,20 +31,18 @@ public class UserService {
     return repository.findByEmail(email);
   }
 
-  /*
-    public List<User> getUsers(PageFromOne page, BoundedPageSize pageSize,
-                               String firstName, String lastName, String email, User.Role role) {
-      if (page == null) {
-        page = new PageFromOne(1);
-      }
-      if (pageSize == null) {
-        pageSize = new BoundedPageSize(15);
-      }
-      Pageable pageable = PageRequest.of(page.getValue() - 1, pageSize.getValue());
+  public List<User> getUsers(
+      PageFromOne page,
+      BoundedPageSize pageSize,
+      String firstName,
+      String lastName,
+      String email,
+      User.Role role) {
+    Pageable pageable = PageUtils.createPageable(page, pageSize);
 
-      return UserManagerDao.findByCriteria(firstName, lastName, email, role, pageable);
-    }
-  */
+    return UserManagerDao.findByCriteria(firstName, lastName, email, role, pageable);
+  }
+
   public User updateUser(String UserId, User updatedUser) {
     User existingUser = getById(UserId);
 
