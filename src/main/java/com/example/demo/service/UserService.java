@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.model.BoundedPageSize;
 import com.example.demo.model.PageFromOne;
 import com.example.demo.model.User;
+import com.example.demo.model.exception.BadRequestException;
+import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.Dao.UserManagerDao;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.utils.PageUtils;
@@ -23,8 +25,9 @@ public class UserService {
   }
 
   public User getById(String UserId) {
-    return repository.findById(UserId).orElseThrow();
-    // .orElseThrow(() -> new ResourceNotFoundException("User with id " + UserId + " not found"));
+    return repository
+        .findById(UserId)
+        .orElseThrow(() -> new NotFoundException("User with id " + UserId + " not found"));
   }
 
   public Optional<User> getByEmail(String email) {
@@ -58,11 +61,11 @@ public class UserService {
     if (updatedUser.getEmail() != null) {
       // Check if email is already used by another User
       Optional<User> UserWithEmail = getByEmail(updatedUser.getEmail());
-      /*
+
       if (UserWithEmail.isPresent() && !UserWithEmail.get().getId().equals(UserId)) {
         throw new BadRequestException("Email " + updatedUser.getEmail() + " is already used");
       }
-      */
+
       existingUser.setEmail(updatedUser.getEmail());
     }
     if (updatedUser.getRole() != null) {
@@ -81,7 +84,7 @@ public class UserService {
   }
 
   public User getByEmailOrThrow(String email) {
-    return getByEmail(email).orElseThrow();
-    // .orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"));
+    return getByEmail(email)
+        .orElseThrow(() -> new NotFoundException("User with email " + email + " not found"));
   }
 }

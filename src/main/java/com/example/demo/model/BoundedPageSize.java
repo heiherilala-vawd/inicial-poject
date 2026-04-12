@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.example.demo.model.exception.BadRequestException;
 import lombok.Getter;
 
 public class BoundedPageSize {
@@ -11,10 +12,10 @@ public class BoundedPageSize {
   public BoundedPageSize(String value) {
     int intValue = Integer.parseInt(value);
     if (intValue < 1) {
-      // throw new BadRequestException("page value must be >=1");
+      throw new BadRequestException("page value must be >=1");
     }
     if (intValue > MAX_SIZE) {
-      // throw new BadRequestException("page size must be <" + MAX_SIZE);
+      throw new BadRequestException("page size must be <" + MAX_SIZE);
     }
     this.value = intValue;
   }

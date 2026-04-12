@@ -1,5 +1,6 @@
 package com.example.demo.model;
 
+import com.example.demo.model.exception.BadRequestException;
 import lombok.Getter;
 
 public class PageFromOne {
@@ -9,7 +10,7 @@ public class PageFromOne {
   public PageFromOne(String value) {
     int intValue = Integer.parseInt(value);
     if (intValue < 1) {
-      // throw new BadRequestException("page value must be >=1");
+      throw new BadRequestException("page value must be >=1");
     }
     this.value = intValue;
   }
