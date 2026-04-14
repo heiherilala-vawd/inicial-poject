@@ -8,6 +8,7 @@ import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.Dao.UserManagerDao;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.utils.PageUtils;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,24 @@ public class UserService {
   private final UserManagerDao UserManagerDao;
 
   public List<User> saveAll(List<User> users) {
-    return repository.saveAll(users);
+
+    List<User> usersToSave = new ArrayList<>();
+
+    for (User user : users) {
+
+      User existingUser =
+          repository
+              .findByEmail(user.getEmail())
+              .orElseThrow(
+                  () -> new BadRequestException("User not found with email: " + user.getEmail()));
+
+      user.setPassword(existingUser.getPassword());
+      user.setId(existingUser.getId());
+
+      usersToSave.add(user);
+    }
+
+    return repository.saveAll(usersToSave);
   }
 
   public User getById(String UserId) {

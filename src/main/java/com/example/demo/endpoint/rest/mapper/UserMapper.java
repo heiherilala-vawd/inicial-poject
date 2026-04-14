@@ -35,7 +35,7 @@ public class UserMapper {
         .role(
             restUser.getRole() != null
                 ? com.example.demo.model.User.Role.valueOf(restUser.getRole().name())
-                : null)
+                : com.example.demo.model.User.Role.EMPLOYEE)
         .firstName(restUser.getFirstName())
         .lastName(restUser.getLastName())
         .sex(
@@ -43,16 +43,18 @@ public class UserMapper {
                 ? com.example.demo.model.User.Sex.valueOf(restUser.getSex().name())
                 : null)
         .email(restUser.getEmail())
+        .password(restUser.getPassword())
         .build();
   }
 
   public User toRestUser(com.example.demo.model.User domainUser) {
     User restUser = new User();
     restUser.setId(domainUser.getId());
-    restUser.setRole(Role.valueOf(domainUser.getRole().name()));
+    restUser.setRole(
+        domainUser.getRole() == null ? null : Role.valueOf(domainUser.getRole().name()));
     restUser.setFirstName(domainUser.getFirstName());
     restUser.setLastName(domainUser.getLastName());
-    restUser.setSex(Sex.valueOf(domainUser.getSex().name()));
+    restUser.setSex(domainUser.getSex() == null ? null : Sex.valueOf(domainUser.getSex().name()));
     restUser.setEmail(domainUser.getEmail());
     restUser.setCreatedAt(domainUser.getCreatedAt());
     restUser.setUpdatedAt(domainUser.getUpdatedAt());

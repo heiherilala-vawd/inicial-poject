@@ -7,6 +7,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +21,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "\"users\"")
@@ -28,7 +33,7 @@ import org.hibernate.type.SqlTypes;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User implements Serializable {
+public class User implements Serializable, UserDetails {
   @Id
   @GeneratedValue(strategy = IDENTITY)
   private String id;
@@ -50,6 +55,9 @@ public class User implements Serializable {
   @Email(message = "Email should be valid")
   @NotBlank(message = "Email is mandatory")
   private String email;
+
+  @NotBlank(message = "Password is mandatory")
+  private String password;
 
   @CreationTimestamp private Instant createdAt;
 
@@ -76,6 +84,16 @@ public class User implements Serializable {
   @Override
   public int hashCode() {
     return getClass().hashCode();
+  }
+
+  @Override
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+  }
+
+  @Override
+  public String getUsername() {
+    return this.email;
   }
 
   public enum Role {

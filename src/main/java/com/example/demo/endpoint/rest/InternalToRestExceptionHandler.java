@@ -8,6 +8,7 @@ import org.hibernate.exception.LockAcquisitionException;
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -61,7 +62,7 @@ public class InternalToRestExceptionHandler {
   @ExceptionHandler(
       value = {
         AccessDeniedException.class,
-        // BadCredentialsException.class,
+        BadCredentialsException.class,
         ForbiddenException.class
       })
   ResponseEntity<com.example.demo.client.model.Exception> handleForbidden(Exception e) {
