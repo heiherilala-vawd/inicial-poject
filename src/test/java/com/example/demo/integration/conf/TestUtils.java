@@ -66,7 +66,8 @@ public class TestUtils {
   public static final String USER2_TOKEN = "user2_token";
   public static final String RANDOM_TOKEN = "random2_token";
 
-  public static final String INTERNAL_SERVER_ERROR = "{\"type\":\"500 INTERNAL_SERVER_ERROR\",\"message\":\"Access Denied\"}";
+  public static final String INTERNAL_SERVER_ERROR =
+      "{\"type\":\"500 INTERNAL_SERVER_ERROR\",\"message\":\"Access Denied\"}";
 
   private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -193,8 +194,8 @@ public class TestUtils {
     user.setLastName("Worker");
     user.setSex(Sex.M);
     user.setEmail(WAREHOUSE_EMAIL);
-      user.setCreatedAt(Instant.parse("2024-01-01T00:00:00Z"));
-      user.setUpdatedAt(Instant.parse("2024-01-01T00:00:00Z"));
+    user.setCreatedAt(Instant.parse("2024-01-01T00:00:00Z"));
+    user.setUpdatedAt(Instant.parse("2024-01-01T00:00:00Z"));
     return user;
   }
 
@@ -206,8 +207,8 @@ public class TestUtils {
     user.setLastName("Doe");
     user.setSex(Sex.M);
     user.setEmail(EMPLOYEE_EMAIL);
-      user.setCreatedAt(Instant.parse("2024-01-01T00:00:00Z"));
-      user.setUpdatedAt(Instant.parse("2024-01-01T00:00:00Z"));
+    user.setCreatedAt(Instant.parse("2024-01-01T00:00:00Z"));
+    user.setUpdatedAt(Instant.parse("2024-01-01T00:00:00Z"));
     return user;
   }
 
@@ -219,8 +220,8 @@ public class TestUtils {
     user.setLastName("Staff");
     user.setSex(Sex.F);
     user.setEmail(ADMINISTRATION_EMAIL);
-      user.setCreatedAt(Instant.parse("2024-01-01T00:00:00Z"));
-      user.setUpdatedAt(Instant.parse("2024-01-01T00:00:00Z"));
+    user.setCreatedAt(Instant.parse("2024-01-01T00:00:00Z"));
+    user.setUpdatedAt(Instant.parse("2024-01-01T00:00:00Z"));
     return user;
   }
 
@@ -232,8 +233,8 @@ public class TestUtils {
     user.setLastName("Martin");
     user.setSex(Sex.F);
     user.setEmail("alice@hei.school");
-      user.setCreatedAt(Instant.parse("2024-01-01T00:00:00Z"));
-      user.setUpdatedAt(Instant.parse("2024-01-01T00:00:00Z"));
+    user.setCreatedAt(Instant.parse("2024-01-01T00:00:00Z"));
+    user.setUpdatedAt(Instant.parse("2024-01-01T00:00:00Z"));
     return user;
   }
 
@@ -245,8 +246,8 @@ public class TestUtils {
     user.setLastName("Bernard");
     user.setSex(Sex.M);
     user.setEmail("bob@hei.school");
-      user.setCreatedAt(Instant.parse(""));
-      user.setUpdatedAt(Instant.parse(""));
+    user.setCreatedAt(Instant.parse(""));
+    user.setUpdatedAt(Instant.parse(""));
     return user;
   }
 
@@ -264,8 +265,7 @@ public class TestUtils {
     return user;
   }
 
-
-  public static CrupdateUser userToCrupdateUser(User user){
+  public static CrupdateUser userToCrupdateUser(User user) {
     CrupdateUser crupdateUser = new CrupdateUser();
     crupdateUser.setFirstName(user.getFirstName());
     crupdateUser.setLastName(user.getLastName());
@@ -274,7 +274,8 @@ public class TestUtils {
     crupdateUser.setSex(user.getSex());
     crupdateUser.setRole(user.getRole());
     return crupdateUser;
-  };
+  }
+  ;
 
   public static int anAvailableRandomPort() {
     try {

@@ -16,8 +16,9 @@ public abstract class AbstractContextInitializer
     postgresContainer =
         new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.2"))
             .withDatabaseName("testdb")
-            .withUsername("postgres")
-            .withPassword("00001111");
+            .withUsername("test")
+            .withPassword("test")
+            .withReuse(true); // Réutiliser le conteneur entre les tests
     postgresContainer.start();
   }
 
