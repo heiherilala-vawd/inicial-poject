@@ -26,10 +26,12 @@ public class AuthService {
   private final UserService userService;
 
   public AuthResponse authenticateUser(LoginRequest loginRequest) {
+
+    UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+        new UsernamePasswordAuthenticationToken(
+            loginRequest.getEmail(), loginRequest.getPassword());
     Authentication authentication =
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginRequest.getEmail(), loginRequest.getPassword()));
+        authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUtils.generateJwtToken(authentication);
@@ -60,7 +62,6 @@ public class AuthService {
     Authentication authentication =
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(savedUser.getEmail(), noEncodedPassword));
-    System.out.println("savedUser.getEmail()");
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUtils.generateJwtToken(authentication);
     AuthResponse authResponse = new AuthResponse();
@@ -73,7 +74,7 @@ public class AuthService {
     return authResponse;
   }
 
-  public AuthResponse whoami() {
+  public AuthResponse whoami(String token) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
     if (authentication == null || !authentication.isAuthenticated()) {
@@ -90,7 +91,7 @@ public class AuthService {
     authResponse.setId(user.getId());
     authResponse.setType("Bearer");
     authResponse.setRole(user.getRole().name());
-    authResponse.setToken(authentication.getDetails().toString());
+    authResponse.setToken(token);
     return authResponse;
   }
 }

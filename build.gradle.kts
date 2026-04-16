@@ -121,16 +121,70 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
     annotationProcessor("org.projectlombok:lombok")
+
+    // ============================================================
+    // TEST DEPENDENCIES (NOUVELLES)
+    // ============================================================
+    // Spring Boot Test
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
     testImplementation("org.springframework.boot:spring-boot-starter-security-test")
     testImplementation("org.springframework.boot:spring-boot-starter-validation-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+
+    // Testcontainers pour PostgreSQL
+    testImplementation("org.testcontainers:testcontainers:1.20.4")
+    testImplementation("org.testcontainers:junit-jupiter:1.20.4")
+    testImplementation("org.testcontainers:postgresql:1.20.4")
+
+    // JavaFaker pour générer des données de test aléatoires
+    //testImplementation("com.github.javafaker:javafaker:1.0.2")
+
+    // Lombok pour les tests
     testCompileOnly("org.projectlombok:lombok")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testAnnotationProcessor("org.projectlombok:lombok")
+
+    // JUnit Platform
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // AJOUTER ces dépendances pour le client Docker
+    testImplementation("com.github.docker-java:docker-java:3.3.6")
+    testImplementation("com.github.docker-java:docker-java-transport-httpclient5:3.3.6")
+
+    implementation("io.sentry:sentry-spring-boot-starter:5.5.3")
+    implementation("io.sentry:sentry-logback:5.5.3")
 }
+
+
+// ============================================================
+// CONFIGURATION DES TESTS
+// ============================================================
 
 tasks.withType<Test> {
     useJUnitPlatform()
+
+    // Testcontainers reuse (optionnel)
+    systemProperty("testcontainers.reuse.enable", "true")
+
+    // 🔥 IMPORTANT FIX DOCKER
+    systemProperty(
+        "testcontainers.docker.socket.override",
+        "/var/run/docker.sock"
+    )
+    systemProperty("testcontainers.docker.client.strategy",
+        "org.testcontainers.dockerclient.UnixSocketClientProviderStrategy")
+
+    systemProperty("docker.host", "unix:///var/run/docker.sock")
+
+    // Logs plus détaillés
+    testLogging {
+        events("passed", "skipped", "failed")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+        showStandardStreams = true
+    }
+
+    ignoreFailures = false
 }

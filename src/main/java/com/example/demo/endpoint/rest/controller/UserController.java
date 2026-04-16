@@ -9,6 +9,8 @@ import com.example.demo.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,9 +25,10 @@ public class UserController {
     return saved.stream().map(userMapper::toRestUser).toList();
   }
 
-  @GetMapping("/users/{id}")
-  public User getUserById(@PathVariable String id) {
-    return userMapper.toRestUser(userService.getById(id));
+  @GetMapping("/users/{userId}")
+  @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
+  public User getUserById(@PathVariable String userId) {
+    return userMapper.toRestUser(userService.getById(userId));
   }
 
   @GetMapping("/users")
