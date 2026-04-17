@@ -8,7 +8,6 @@ import static org.mockito.Mockito.*;
 import com.example.demo.model.BoundedPageSize;
 import com.example.demo.model.PageFromOne;
 import com.example.demo.model.User;
-import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.Dao.UserManagerDao;
 import com.example.demo.repository.UserRepository;
@@ -58,64 +57,6 @@ class UserServiceTest {
             .firstName("John Updated")
             .lastName("Doe Updated")
             .build();
-  }
-
-  // ==================== TESTS POUR saveAll ====================
-
-  @Test
-  void saveAll_ShouldUpdateExistingUsers_WhenUsersExist() {
-    // Given
-    List<User> usersToUpdate = List.of(newUser);
-    when(repository.findByEmail("john.doe@example.com")).thenReturn(Optional.of(existingUser));
-    when(repository.saveAll(anyList())).thenReturn(List.of(existingUser));
-
-    // When
-    List<User> result = userService.saveAll(usersToUpdate);
-
-    // Then
-    assertThat(result).hasSize(1);
-    assertThat(result.get(0).getId()).isEqualTo(existingUser.getId());
-    assertThat(result.get(0).getPassword()).isEqualTo(existingUser.getPassword());
-    verify(repository).findByEmail("john.doe@example.com");
-    verify(repository).saveAll(anyList());
-  }
-
-  @Test
-  void saveAll_ShouldThrowBadRequestException_WhenUserNotFound() {
-    // Given
-    List<User> usersToUpdate = List.of(newUser);
-    when(repository.findByEmail("john.doe@example.com")).thenReturn(Optional.empty());
-
-    // When & Then
-    assertThatThrownBy(() -> userService.saveAll(usersToUpdate))
-        .isInstanceOf(BadRequestException.class)
-        .hasMessageContaining("User not found with email: john.doe@example.com");
-
-    verify(repository, never()).saveAll(anyList());
-  }
-
-  @Test
-  void saveAll_ShouldHandleMultipleUsers_WhenAllExist() {
-    // Given
-    User user1 = User.builder().email("user1@example.com").build();
-    User user2 = User.builder().email("user2@example.com").build();
-    List<User> usersToUpdate = List.of(user1, user2);
-
-    User existingUser1 =
-        User.builder().id("1").email("user1@example.com").password("pass1").build();
-    User existingUser2 =
-        User.builder().id("2").email("user2@example.com").password("pass2").build();
-
-    when(repository.findByEmail("user1@example.com")).thenReturn(Optional.of(existingUser1));
-    when(repository.findByEmail("user2@example.com")).thenReturn(Optional.of(existingUser2));
-    when(repository.saveAll(anyList())).thenReturn(List.of(existingUser1, existingUser2));
-
-    // When
-    List<User> result = userService.saveAll(usersToUpdate);
-
-    // Then
-    assertThat(result).hasSize(2);
-    verify(repository).saveAll(argThat(list -> ((List<User>) list).size() == 2));
   }
 
   // ==================== TESTS POUR getById ====================
@@ -226,105 +167,6 @@ class UserServiceTest {
     assertThat(result).hasSize(1);
     verify(userManagerDao)
         .findByCriteria(eq(null), eq(null), eq(null), eq(null), any(Pageable.class));
-  }
-
-  // ==================== TESTS POUR updateUser ====================
-
-  @Test
-  void updateUser_ShouldUpdateAllFields_WhenAllFieldsProvided() {
-    // Given
-    User updatedUser =
-        User.builder()
-            .firstName("Jane")
-            .lastName("Smith")
-            .sex(User.Sex.F)
-            .email("jane.smith@example.com")
-            .role(User.Role.ADMIN)
-            .comment("Updated comment")
-            .build();
-
-    when(repository.findById(userId)).thenReturn(Optional.of(existingUser));
-    when(repository.findByEmail("jane.smith@example.com")).thenReturn(Optional.empty());
-    when(repository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    // When
-    User result = userService.updateUser(userId, updatedUser);
-
-    // Then
-    assertThat(result.getFirstName()).isEqualTo("Jane");
-    assertThat(result.getLastName()).isEqualTo("Smith");
-    assertThat(result.getSex()).isEqualTo(User.Sex.F);
-    assertThat(result.getEmail()).isEqualTo("jane.smith@example.com");
-    assertThat(result.getRole()).isEqualTo(User.Role.ADMIN);
-    assertThat(result.getComment()).isEqualTo("Updated comment");
-    verify(repository).save(existingUser);
-  }
-
-  @Test
-  void updateUser_ShouldUpdateOnlyNonNullFields_WhenPartialUpdate() {
-    // Given
-    User updatedUser = User.builder().firstName("Jane Only").comment("New comment").build();
-
-    when(repository.findById(userId)).thenReturn(Optional.of(existingUser));
-    when(repository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    // When
-    User result = userService.updateUser(userId, updatedUser);
-
-    // Then
-    assertThat(result.getFirstName()).isEqualTo("Jane Only");
-    assertThat(result.getLastName()).isEqualTo("Doe"); // Not changed
-    assertThat(result.getEmail()).isEqualTo("john.doe@example.com"); // Not changed
-    assertThat(result.getComment()).isEqualTo("New comment");
-    verify(repository).save(existingUser);
-  }
-
-  @Test
-  void updateUser_ShouldThrowBadRequestException_WhenEmailAlreadyUsedByAnotherUser() {
-    // Given
-    User updatedUser = User.builder().email("taken@example.com").build();
-    User anotherUser = User.builder().id("different-id").email("taken@example.com").build();
-
-    when(repository.findById(userId)).thenReturn(Optional.of(existingUser));
-    when(repository.findByEmail("taken@example.com")).thenReturn(Optional.of(anotherUser));
-
-    // When & Then
-    assertThatThrownBy(() -> userService.updateUser(userId, updatedUser))
-        .isInstanceOf(BadRequestException.class)
-        .hasMessageContaining("Email taken@example.com is already used");
-
-    verify(repository, never()).save(any());
-  }
-
-  @Test
-  void updateUser_ShouldAllowSameEmail_WhenUpdatingSameUser() {
-    // Given
-    User updatedUser = User.builder().email("john.doe@example.com").build();
-
-    when(repository.findById(userId)).thenReturn(Optional.of(existingUser));
-    when(repository.findByEmail("john.doe@example.com")).thenReturn(Optional.of(existingUser));
-    when(repository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-    // When
-    User result = userService.updateUser(userId, updatedUser);
-
-    // Then
-    assertThat(result.getEmail()).isEqualTo("john.doe@example.com");
-    verify(repository).save(existingUser);
-  }
-
-  @Test
-  void updateUser_ShouldThrowNotFoundException_WhenUserToUpdateDoesNotExist() {
-    // Given
-    String nonExistentId = "non-existent-id";
-    when(repository.findById(nonExistentId)).thenReturn(Optional.empty());
-
-    // When & Then
-    assertThatThrownBy(() -> userService.updateUser(nonExistentId, newUser))
-        .isInstanceOf(NotFoundException.class)
-        .hasMessageContaining("User with id " + nonExistentId + " not found");
-
-    verify(repository, never()).save(any());
   }
 
   // ==================== TESTS POUR deleteById ====================

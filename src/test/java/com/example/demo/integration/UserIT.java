@@ -131,13 +131,12 @@ class UserIT {
 
     User newAdmin1 = admin1();
     newAdmin1.setLastName("new last name");
-    // Todo : bug createAt go null after update
-    newAdmin1.setCreatedAt(null);
 
     List<User> created = api.crupdateUsers(List.of(newUser1, newUser2, newUser3));
     User user =
         created.stream().filter(u -> ADMIN_EMAIL.equals(u.getEmail())).findFirst().orElse(null);
     newAdmin1.setUpdatedAt(user.getUpdatedAt());
+    newAdmin1.setUpdatedBy(admin1().getId());
 
     assertEquals(3, created.size());
     assertNotNull(created.get(0).getId());

@@ -6,20 +6,17 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.Hibernate;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,10 +27,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Getter
 @Setter
 @ToString
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @NoArgsConstructor
-public class User implements Serializable, UserDetails {
+public class User extends CreatAndUpdateEntity implements Serializable, UserDetails {
   @Id
   @GeneratedValue(strategy = IDENTITY)
   private String id;
@@ -58,20 +55,6 @@ public class User implements Serializable, UserDetails {
 
   @NotBlank(message = "Password is mandatory")
   private String password;
-
-  @CreationTimestamp private Instant createdAt;
-
-  @UpdateTimestamp private Instant updatedAt;
-
-  @ManyToOne
-  @JoinColumn(name = "created_by")
-  private User createdBy;
-
-  @ManyToOne
-  @JoinColumn(name = "updated_by")
-  private User updatedBy;
-
-  private String comment;
 
   @Override
   public boolean equals(Object o) {

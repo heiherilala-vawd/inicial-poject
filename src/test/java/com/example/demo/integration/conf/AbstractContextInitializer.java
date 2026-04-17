@@ -26,7 +26,6 @@ public abstract class AbstractContextInitializer
     jdbcUrl = postgresContainer.getJdbcUrl();
     username = postgresContainer.getUsername();
     password = postgresContainer.getPassword();
-    System.out.println("=== Running locally, using Testcontainers ===");
 
     TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
         applicationContext,

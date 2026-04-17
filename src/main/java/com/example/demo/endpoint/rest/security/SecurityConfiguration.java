@@ -56,9 +56,6 @@ public class SecurityConfiguration {
                     // PUT /users - Création/Mise à jour d'utilisateurs - ADMIN uniquement
                     .requestMatchers(PUT, "/users")
                     .hasRole("ADMIN")
-                    // .requestMatchers(new SelfMatcher(userService, PUT, "/users")).authenticated()
-                    // .requestMatchers(new SelfMatcher(userService, GET,
-                    // "/users/*")).authenticated()
                     .requestMatchers(GET, "/users/*")
                     .authenticated()
 
