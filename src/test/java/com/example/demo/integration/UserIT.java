@@ -72,8 +72,6 @@ class UserIT {
     assertEquals(warehouseWorker1(), warehouse);
   }
 
-  // todo : config selfmatcher
-
   @Test
   void employee_can_only_get_own_user_by_id() throws Exception {
     ApiClient employeeClient = anApiClient(EMPLOYEE_TOKEN);

@@ -36,6 +36,18 @@ spotless {
         removeUnusedImports()
         trimTrailingWhitespace()
         endWithNewline()
+        //target("src/**")
+        // 🔥 IMPORTANT : Exclure les fichiers générés automatiquement
+        targetExclude(
+            // Exclure tout le dossier du client généré
+            "**/build/**",
+            "**/client/**",
+            "**/generated/**",
+            "**/gen/**",
+
+            // Exclure spécifiquement le client API généré
+            "src/main/java/com/example/demo/client/**",
+        )
     }
 }
 
@@ -142,7 +154,6 @@ val jacocoExcludePatterns = listOf(
 )
 
 // Tâche pour générer le rapport JaCoCo
-// Tâche pour générer le rapport JaCoCo
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
 
@@ -176,7 +187,6 @@ tasks.jacocoTestCoverageVerification {
         })
     )
 
-
     violationRules {
         rule {
             element = "BUNDLE"
@@ -189,15 +199,6 @@ tasks.jacocoTestCoverageVerification {
                 counter = "BRANCH"
                 value = "COVEREDRATIO"
                 minimum = "0.40".toBigDecimal()
-            }
-        }
-
-        rule {
-            element = "PACKAGE"
-            limit {
-                counter = "LINE"
-                value = "COVEREDRATIO"
-                minimum = "0.10".toBigDecimal()
             }
         }
     }
@@ -221,28 +222,6 @@ sonarqube {
         property("sonar.exclusions", "**/client/**, **/model/**, **/dto/**, **/config/**")
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

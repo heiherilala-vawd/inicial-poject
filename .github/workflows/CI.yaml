@@ -15,25 +15,14 @@ jobs:
     name: Tests et Couverture de code
     runs-on: ubuntu-latest
     
-    services:
-      postgres:
-        image: postgres:15.2
-        env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: test-db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    
     steps:
       # 1. Récupérer le code
       - name: Checkout code
         uses: actions/checkout@v4
+
+# === AJOUTER CETTE ÉTAPE POUR TESTCONTAINERS ===
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       
       # 2. Installer JDK 21
       - name: Set up JDK 21
@@ -53,7 +42,7 @@ jobs:
       
       # 5. Exécuter les tests et générer le rapport JaCoCo
       - name: Run tests with JaCoCo
-        run: ./gradlew test jacocoTestReport --no-daemon --info
+        run: ./gradlew test jacocoTestReport --no-daemon --info --stacktrace
       
       # 6. Vérifier les seuils de couverture
       - name: Check coverage thresholds

@@ -4,33 +4,36 @@ import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 
 public abstract class AbstractContextInitializer
     implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
-  // Utiliser une version plus récente de PostgreSQL
-  private static final PostgreSQLContainer<?> postgresContainer;
-
-  static {
-    postgresContainer =
-        new PostgreSQLContainer<>(DockerImageName.parse("postgres:16.2"))
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test")
-            .withReuse(true); // Réutiliser le conteneur entre les tests
-    postgresContainer.start();
-  }
-
   @Override
   public void initialize(ConfigurableApplicationContext applicationContext) {
     String flywayTestdataPath = "classpath:/db/testdata";
+
+    String jdbcUrl;
+    String username;
+    String password;
+
+    // Utiliser Testcontainers en local
+    PostgreSQLContainer<?> postgresContainer =
+        new PostgreSQLContainer<>("postgres:15.2")
+            .withDatabaseName("test-db")
+            .withUsername("test")
+            .withPassword("test");
+    postgresContainer.start();
+    jdbcUrl = postgresContainer.getJdbcUrl();
+    username = postgresContainer.getUsername();
+    password = postgresContainer.getPassword();
+    System.out.println("=== Running locally, using Testcontainers ===");
+
     TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
         applicationContext,
         "server.port=" + this.getServerPort(),
-        "spring.datasource.url=" + postgresContainer.getJdbcUrl(),
-        "spring.datasource.username=" + postgresContainer.getUsername(),
-        "spring.datasource.password=" + postgresContainer.getPassword(),
+        "spring.datasource.url=" + jdbcUrl,
+        "spring.datasource.username=" + username,
+        "spring.datasource.password=" + password,
         "spring.flyway.locations=classpath:/db/migration," + flywayTestdataPath,
         "jwt.secret.key=test-secret-key-test-secret-key-test",
         "jwt.expiration.time=86400000");
