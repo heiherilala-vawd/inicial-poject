@@ -13,6 +13,8 @@ import com.example.demo.endpoint.rest.security.jwt.JwtUtils;
 import com.example.demo.integration.conf.AbstractContextInitializer;
 import com.example.demo.integration.conf.TestUtils;
 import jakarta.transaction.Transactional;
+import java.sql.Connection;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +28,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ContextConfiguration(initializers = AuthIT.ContextInitializer.class)
@@ -36,8 +35,7 @@ import java.sql.Connection;
 @Testcontainers
 @Rollback
 class AuthIT {
-  @Autowired
-  private DataSource dataSource;
+  @Autowired private DataSource dataSource;
   @MockitoBean private SentryConf sentryConf;
   @MockitoBean private JwtUtils jwtServiceMock;
   @MockitoBean private AuthenticationManager authenticationManagerMock;
@@ -60,12 +58,9 @@ class AuthIT {
     TestUtils.setUpJwtService(jwtServiceMock);
     TestUtils.setUpAuthenticationManager(authenticationManagerMock);
     try (Connection conn = dataSource.getConnection()) {
-      ScriptUtils.executeSqlScript(conn,
-              new ClassPathResource("db/testdata/V99_1__testdata.sql"));
+      ScriptUtils.executeSqlScript(conn, new ClassPathResource("db/testdata/V99_1__testdata.sql"));
     }
   }
-
-
 
   @Test
   void user_can_login_with_valid_credentials() throws Exception {

@@ -51,16 +51,13 @@ public class SecurityConfiguration {
                     // USERS
                     // =========================
                     // GET /users, GET /users/{id} - Accessible par ADMIN
-                    .requestMatchers(GET,"/users")
+                    .requestMatchers(GET, "/users")
                     .hasRole("ADMIN")
                     // PUT /users - Création/Mise à jour d'utilisateurs - ADMIN uniquement
                     .requestMatchers(PUT, "/users")
                     .hasRole("ADMIN")
-                    //.requestMatchers(new SelfMatcher(userService, PUT, "/users")).authenticated()
-                    //.requestMatchers(new SelfMatcher(userService, GET, "/users/*")).authenticated()
                     .requestMatchers(GET, "/users/*")
                     .authenticated()
-
 
                     // DELETE /users - ADMIN uniquement
                     .requestMatchers(DELETE, "/users/*")

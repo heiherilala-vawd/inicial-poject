@@ -8,6 +8,7 @@ import com.example.demo.model.exception.BadRequestException;
 import com.example.demo.model.exception.NotFoundException;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
+import com.example.demo.service.utils.ModificationUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +25,7 @@ public class AuthService {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final UserService userService;
+  private final ModificationUtils modificationUtils;
 
   public AuthResponse authenticateUser(LoginRequest loginRequest) {
 
@@ -56,8 +58,11 @@ public class AuthService {
       throw new BadRequestException("Email is already in use");
     }
     user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+    modificationUtils.createOrUpdateModel(user, null, null);
     User savedUser = userRepository.save(user);
-    System.out.println(savedUser.getEmail());
+    modificationUtils.createOrUpdateModel(savedUser, null, savedUser);
+    savedUser = userRepository.save(user);
 
     Authentication authentication =
         authenticationManager.authenticate(

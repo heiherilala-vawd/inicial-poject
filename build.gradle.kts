@@ -8,6 +8,8 @@ plugins {
     id("org.openapi.generator") version "7.6.0"
     id("checkstyle")
     id("com.diffplug.spotless") version "6.25.0"
+    id("jacoco")
+    id("org.sonarqube") version "5.0.0.4638"  // Optionnel
 }
 
 group = "com.example"
@@ -24,14 +26,34 @@ repositories {
     mavenCentral()
 }
 
+// ============================================================
+// SPOTLESS - FORMATAGE DU CODE
+// ============================================================
+
 spotless {
     java {
         googleJavaFormat()
         removeUnusedImports()
         trimTrailingWhitespace()
         endWithNewline()
+        //target("src/**")
+        // 🔥 IMPORTANT : Exclure les fichiers générés automatiquement
+        targetExclude(
+            // Exclure tout le dossier du client généré
+            "**/build/**",
+            "**/client/**",
+            "**/generated/**",
+            "**/gen/**",
+
+            // Exclure spécifiquement le client API généré
+            "src/main/java/com/example/demo/client/**",
+        )
     }
 }
+
+// ============================================================
+// CHECKSTYLE - QUALITE STATIQUE
+// ============================================================
 
 checkstyle {
     toolVersion = "10.17.0"
@@ -44,6 +66,10 @@ tasks.withType<Checkstyle>().configureEach {
         html.required = true
     }
 }
+
+// ============================================================
+// GENERATION CLIENT API
+// ============================================================
 
 val generateJavaClient by tasks.registering(GenerateTask::class)  {
     //outputDir.set("$projectDir/src/main/java")
@@ -104,6 +130,102 @@ val publishJavaClientToMavenLocal by tasks.registering(Exec::class) {
 tasks.named("compileJava") {
     dependsOn(publishJavaClientToMavenLocal)
 }
+
+
+// ============================================================
+// JACOCO - COUVERTURE DE CODE
+// ============================================================
+
+jacoco {
+    toolVersion = "0.8.11"
+}
+
+
+// Définir les exclusions
+val jacocoExcludePatterns = listOf(
+    "**/client/**",
+    "**/model/**",
+    "**/api/**",
+    "**/invoker/**",
+    "**/dto/**",
+    "**/config/**",
+    "**/*Application.class",
+    "**/*Application*.*"
+)
+
+// Tâche pour générer le rapport JaCoCo
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+
+    reports {
+        html.required = true
+        xml.required = true
+        csv.required = false
+    }
+
+    // Exclure les classes des packages spécifiés
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it).matching {
+                exclude(jacocoExcludePatterns)
+            }
+        })
+    )
+
+}
+
+// Tâche pour vérifier les seuils de couverture
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+
+    // Exclure les classes des packages spécifiés
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it).matching {
+                exclude(jacocoExcludePatterns)
+            }
+        })
+    )
+
+    violationRules {
+        rule {
+            element = "BUNDLE"
+            limit {
+                counter = "LINE"
+                value = "COVEREDRATIO"
+                minimum = "0.50".toBigDecimal()
+            }
+            limit {
+                counter = "BRANCH"
+                value = "COVEREDRATIO"
+                minimum = "0.40".toBigDecimal()
+            }
+        }
+    }
+
+}
+
+
+// ============================================================
+// SONARQUBE - ANALYSE CONTINUE (optionnel)
+// ============================================================
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "votre-projet-key")
+        property("sonar.organization", "votre-organization")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.coverage.jacoco.xmlReportPaths",
+            layout.buildDirectory.file("reports/jacoco/jacocoTestReport.xml").get().asFile.toString())
+        property("sonar.java.checkstyle.reportPaths",
+            layout.buildDirectory.file("reports/checkstyle/main.xml").get().asFile.toString())
+        property("sonar.exclusions", "**/client/**, **/model/**, **/dto/**, **/config/**")
+    }
+}
+
+
+
+
 
 dependencies {
     implementation("org.openapitools:jackson-databind-nullable:0.2.6")
@@ -187,4 +309,7 @@ tasks.withType<Test> {
     }
 
     ignoreFailures = false
+
+    // JaCoCo s'attache automatiquement à cette tâche
+    finalizedBy(tasks.jacocoTestReport)
 }

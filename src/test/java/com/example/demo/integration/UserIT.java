@@ -13,12 +13,9 @@ import com.example.demo.client.model.User;
 import com.example.demo.endpoint.rest.security.jwt.JwtUtils;
 import com.example.demo.integration.conf.AbstractContextInitializer;
 import com.example.demo.integration.conf.TestUtils;
-
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.List;
-
-import jakarta.transaction.Transactional;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,20 +25,16 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
-import javax.sql.DataSource;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Testcontainers
 @ContextConfiguration(initializers = UserIT.ContextInitializer.class)
 class UserIT {
-  @Autowired
-  private DataSource dataSource;
+  @Autowired private DataSource dataSource;
 
   @MockitoBean private SentryConf sentryConf;
   @MockitoBean private AuthenticationManager authenticationManagerMock;
@@ -57,8 +50,7 @@ class UserIT {
     TestUtils.setUpJwtService(jwtServiceMock);
     TestUtils.setUpAuthenticationManager(authenticationManagerMock);
     try (Connection conn = dataSource.getConnection()) {
-      ScriptUtils.executeSqlScript(conn,
-              new ClassPathResource("db/testdata/V99_1__testdata.sql"));
+      ScriptUtils.executeSqlScript(conn, new ClassPathResource("db/testdata/V99_1__testdata.sql"));
     }
   }
 
@@ -79,7 +71,6 @@ class UserIT {
     assertEquals(employee1(), employee);
     assertEquals(warehouseWorker1(), warehouse);
   }
-  //todo : config selfmatcher
 
   @Test
   void employee_can_only_get_own_user_by_id() throws Exception {
@@ -91,7 +82,7 @@ class UserIT {
     assertEquals(employee1(), ownUser);
 
     // Employee ne peut pas voir les autres utilisateurs
-    //todo : make toh forbiden exeption
+    // todo : make toh forbiden exeption
     assertThrowsApiException(INTERNAL_SERVER_ERROR, () -> api.getUserById(ADMIN_ID));
     assertThrowsApiException(INTERNAL_SERVER_ERROR, () -> api.getUserById(WAREHOUSE_ID));
   }
@@ -134,22 +125,18 @@ class UserIT {
     CrupdateUser newUser2 = userToCrupdateUser(employee1());
     CrupdateUser newUser3 = userToCrupdateUser(administration1());
 
-
     newUser1.setLastName("new last name");
     newUser2.setFirstName("new first name");
     newUser3.setSex(Sex.F);
 
     User newAdmin1 = admin1();
     newAdmin1.setLastName("new last name");
-    //Todo : bug createAt go null after update
-    newAdmin1.setCreatedAt(null);
 
     List<User> created = api.crupdateUsers(List.of(newUser1, newUser2, newUser3));
-    User user = created.stream()
-            .filter(u -> ADMIN_EMAIL.equals(u.getEmail()))
-            .findFirst()
-            .orElse(null);
+    User user =
+        created.stream().filter(u -> ADMIN_EMAIL.equals(u.getEmail())).findFirst().orElse(null);
     newAdmin1.setUpdatedAt(user.getUpdatedAt());
+    newAdmin1.setUpdatedBy(admin1().getId());
 
     assertEquals(3, created.size());
     assertNotNull(created.get(0).getId());
@@ -164,24 +151,24 @@ class UserIT {
     assertThrowsForbiddenException(() -> api.crupdateUsers(List.of(someCreatableUser())));
   }
 
-/*
-  @Test
-  void admin_can_delete_user() throws Exception {
-    ApiClient adminClient = anApiClient(ADMIN_TOKEN);
-    UsersApi api = new UsersApi(adminClient);
+  /*
+   @Test
+   void admin_can_delete_user() throws Exception {
+     ApiClient adminClient = anApiClient(ADMIN_TOKEN);
+     UsersApi api = new UsersApi(adminClient);
 
-    // Créer un utilisateur
-    CrupdateUser newUser = someCreatableUser();
-    List<User> created = api.crupdateUsers(List.of(newUser));
-    String userId = created.get(0).getId();
+     // Créer un utilisateur
+     CrupdateUser newUser = someCreatableUser();
+     List<User> created = api.crupdateUsers(List.of(newUser));
+     String userId = created.get(0).getId();
 
-    // Supprimer l'utilisateur
-    api.deleteUserById(userId);
+     // Supprimer l'utilisateur
+     api.deleteUserById(userId);
 
-    // Vérifier la suppression
-    assertThrowsApiException("404 Not Found", () -> api.getUserById(userId));
-  }
- */
+     // Vérifier la suppression
+     assertThrowsApiException("404 Not Found", () -> api.getUserById(userId));
+   }
+  */
 
   @Test
   void employee_cannot_delete_user() {
